@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Devotional Generator - Depths to Heights</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #1e2a4a 0%, #3d5a80 30%, #f4d35e 70%, #faf0ca 100%);
+            color: #2c3e50;
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .screen {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s ease;
+            min-height: 90vh;
+        }
+
+        .screen.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .home-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(45deg, #3d5a80, #1e2a4a);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 25px rgba(61, 90, 128, 0.3);
+            font-weight: 600;
+        }
+
+        .home-btn:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 12px 30px rgba(61, 90, 128, 0.4);
+        }
+
+        .language-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #f4d35e, #e09f3e);
+            color: #2c3e50;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 25px rgba(244, 211, 94, 0.3);
+            font-weight: 600;
+        }
+
+        .language-toggle:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 12px 30px rgba(244, 211, 94, 0.4);
+        }
+
+        /* Opening Screen */
+        .opening {
+            text-align: center;
+            padding: 80px 20px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 70%);
+            border-radius: 30px;
+            margin: 40px 0;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .opening h1 {
+            font-size: 3.2rem;
+            background: linear-gradient(45deg, #1e2a4a, #3d5a80, #f4d35e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .opening .hook {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            color: #4a5568;
+            margin-bottom: 40px;
+            font-weight: 400;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            font-style: italic;
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #3d5a80, #1e2a4a);
+            color: white;
+            border: none;
+            padding: 22px 50px;
+            border-radius: 35px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 12px 30px rgba(61, 90, 128, 0.3);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(61, 90, 128, 0.4);
+        }
+
+        /* Assessment Screen */
+        .assessment {
+            background: rgba(255,255,255,0.95);
+            border-radius: 25px;
+            padding: 40px;
+            margin: 20px 0;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .assessment-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .assessment-header h2 {
+            font-size: 2.5rem;
+            color: #1e2a4a;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .assessment-header p {
+            font-size: 1.2rem;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .category-section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(244, 211, 94, 0.1), rgba(250, 240, 202, 0.2));
+            border-radius: 20px;
+            border-left: 5px solid #f4d35e;
+        }
+
+        .category-title {
+            font-size: 1.8rem;
+            color: #1e2a4a;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .category-icon {
+            font-size: 2rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option-card {
+            background: rgba(255,255,255,0.9);
+            border: 2px solid #e5e7eb;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(244, 211, 94, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .option-card:hover::before {
+            left: 100%;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(61, 90, 128, 0.15);
+            border-color: #3d5a80;
+        }
+
+        .option-card.selected {
+            background: linear-gradient(135deg, #3d5a80, #1e2a4a);
+            color: white;
+            border-color: #1e2a4a;
+            transform: translateY(-3px);
+        }
+
+        .option-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .option-card p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        .generate-btn {
+            background: linear-gradient(45deg, #f4d35e, #e09f3e);
+            color: #1e2a4a;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 30px auto;
+            display: block;
+            box-shadow: 0 10px 25px rgba(244, 211, 94, 0.3);
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(244, 211, 94, 0.4);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Devotional Screen */
+        .devotional {
+            background: rgba(255,255,255,0.95);
+            border-radius: 25px;
+            padding: 50px;
+            margin: 20px 0;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .devotional-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f4d35e;
+        }
+
+        .devotional-date {
+            font-size: 1rem;
+            color: #6b7280;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .devotional-title {
+            font-size: 2.5rem;
+            color: #1e2a4a;
+            margin-bottom: 15px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .devotional-theme {
+            font-size: 1.1rem;
+            color: #3d5a80;
+            font-style: italic;
+        }
+
+        .scripture-section {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            border-left: 5px solid #3d5a80;
+            text-align: center;
+        }
+
+        .scripture-reference {
+            font-size: 1.2rem;
+            color: #3d5a80;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .scripture-text {
+            font-size: 1.4rem;
+            line-height: 1.8;
+            color: #1e2a4a;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .audio-controls {
+            margin-top: 20px;
+        }
+
+        .audio-btn {
+            background: linear-gradient(45deg, #3d5a80, #1e2a4a);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+
+        .audio-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(61, 90, 128, 0.3);
+        }
+
+        .content-section {
+            margin: 40px 0;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #1e2a4a;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #374151;
+            margin-bottom: 20px;
+        }
+
+        .reflection-questions {
+            background: rgba(244, 211, 94, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .reflection-questions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .reflection-questions li {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 10px;
+            border-left: 4px solid #f4d35e;
+        }
+
+        .action-steps {
+            background: rgba(61, 90, 128, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .action-steps ol {
+            padding-left: 20px;
+        }
+
+        .action-steps li {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .journal-section {
+            background: linear-gradient(135deg, rgba(250, 240, 202, 0.3), rgba(244, 211, 94, 0.1));
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .journal-textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-family: 'Georgia', serif;
+            line-height: 1.6;
+            background: rgba(255,255,255,0.9);
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .journal-textarea:focus {
+            outline: none;
+            border-color: #3d5a80;
+            box-shadow: 0 0 0 3px rgba(61, 90, 128, 0.1);
+        }
+
+        .prayer-section {
+            background: linear-gradient(135deg, rgba(30, 42, 74, 0.05), rgba(61, 90, 128, 0.1));
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .prayer-text {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #1e2a4a;
+            font-style: italic;
+            margin: 20px 0;
+        }
+
+        .devotional-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: linear-gradient(45deg, #3d5a80, #1e2a4a);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(61, 90, 128, 0.3);
+        }
+
+        .action-btn.secondary {
+            background: linear-gradient(45deg, #f4d35e, #e09f3e);
+            color: #1e2a4a;
+        }
+
+        .action-btn.secondary:hover {
+            box-shadow: 0 10px 20px rgba(244, 211, 94, 0.3);
+        }
+
+        /* Library Screen */
+        .library {
+            background: rgba(255,255,255,0.95);
+            border-radius: 25px;
+            padding: 40px;
+            margin: 20px 0;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .library-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .library-header h2 {
+            font-size: 2.5rem;
+            color: #1e2a4a;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .devotional-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,249,250,0.9));
+            border: 2px solid #e5e7eb;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .devotional-card:hover {
+            transform: translateY(-3px);
+            border-color: #3d5a80;
+            box-shadow: 0 15px 30px rgba(61, 90, 128, 0.15);
+        }
+
+        .card-date {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            color: #1e2a4a;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .card-preview {
+            font-size: 1rem;
+            color: #374151;
+            line-height: 1.5;
+        }
+
+        /* About Section */
+        .about-content {
+            background: rgba(255,255,255,0.95);
+            border-radius: 25px;
+            padding: 40px;
+            margin: 20px 0;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: center;
+            line-height: 1.8;
+        }
+
+        .about-content h3 {
+            color: #1e2a4a;
+            margin-bottom: 25px;
+            font-size: 2.2rem;
+            font-weight: 600;
+        }
+
+        .about-content p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: #4a5568;
+        }
+
+        .crisis-note {
+            background: linear-gradient(45deg, #dc2626, #ef4444);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .donation-section {
+            background: linear-gradient(135deg, #f4d35e, #e09f3e);
+            color: #1e2a4a;
+            padding: 30px;
+            border-radius: 20px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .donation-link {
+            display: inline-block;
+            background: rgba(30, 42, 74, 0.1);
+            color: #1e2a4a;
+            text-decoration: none;
+            padding: 15px 35px;
+            border-radius: 30px;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(30, 42, 74, 0.2);
+        }
+
+        .donation-link:hover {
+            background: rgba(30, 42, 74, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        .website-link {
+            display: inline-block;
+            background: linear-gradient(45deg, #3d5a80, #1e2a4a);
+            color: white;
+            text-decoration: none;
+            padding: 15px 35px;
+            border-radius: 30px;
+            margin: 20px 10px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .website-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(61, 90, 128, 0.3);
+        }
+
+        /* Audio Controls */
+        .audio-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #3d5a80, #1e2a4a);
+            border-radius: 25px;
+            padding: 15px 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 25px rgba(61, 90, 128, 0.3);
+        }
+
+        .volume-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 5px;
+        }
+
+        .volume-btn:hover {
+            transform: scale(1.2);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .opening h1 {
+                font-size: 2.5rem;
+            }
+            
+            .opening .hook {
+                font-size: 1.1rem;
+            }
+            
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .devotional {
+                padding: 30px 20px;
+            }
+            
+            .devotional-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .language-toggle,
+            .home-btn {
+                position: relative;
+                top: auto;
+                left: auto;
+                right: auto;
+                margin: 10px;
+                display: inline-block;
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .slide-in-right {
+            animation: slideInRight 0.6s ease forwards;
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Loading States */
+        .loading {
+            text-align: center;
+            padding: 60px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #3d5a80;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <button class="home-btn" onclick="goHome()" style="display: none;">🏠 Home</button>
+    <button class="language-toggle" onclick="toggleLanguage()" id="lang-toggle">Suomi</button>
+    
+    <div class="container">
+        <!-- Opening Screen -->
+        <div id="opening" class="screen active">
+            <div class="opening fade-in">
+                <h1 data-en="Daily Devotional Generator" data-fi="Päivittäinen Hartausgeneraattori">Daily Devotional Generator</h1>
+                <div class="hook">
+                    <span data-en='"Your word is a lamp for my feet, a light on my path." — Psalm 119:105' data-fi='"Sinun sanasi on minun jalkani lamppu ja valkeus minun poluilleni." — Psalmit 119:105'>"Your word is a lamp for my feet, a light on my path."<br><small>— Psalm 119:105</small></span><br><br>
+                    <span data-en="What if God had a personal word waiting for you today, perfectly crafted for exactly where you are in life? What wisdom might unfold when His truth meets your unique season and circumstances?" data-fi="Entä jos Jumalalla olisi henkilökohtainen sana odottamassa sinua tänään, täydellisesti luotu juuri sinne missä olet elämässäsi? Mitä viisautta voisi paljastua kun Hänen totuutensa kohtaa ainutlaatuisen aikakautesi ja olosuhteesi?">What if God had a personal word waiting for you today, perfectly crafted for exactly where you are in life?<br>What wisdom might unfold when His truth meets your unique season and circumstances?</span>
+                </div>
+                <button class="start-btn pulse" onclick="showScreen('assessment')" data-en="Discover God's Word for Me" data-fi="Löydä Jumalan Sana Minulle">Discover God's Word for Me</button>
+            </div>
+        </div>
+
+        <!-- Assessment Screen -->
+        <div id="assessment" class="screen">
+            <div class="assessment">
+                <div class="assessment-header">
+                    <h2 data-en="Personal Devotional Assessment" data-fi="Henkilökohtainen Hartausarviointi">Personal Devotional Assessment</h2>
+                    <p data-en="Help us create a devotional perfectly tailored to your current season" data-fi="Auta meitä luomaan hartaus, joka on täydellisesti räätälöity nykyiseen aikakaateesi">Help us create a devotional perfectly tailored to your current season</p>
+                </div>
+
+                <!-- Life Stage Section -->
+                <div class="category-section">
+                    <h3 class="category-title">
+                        <span class="category-icon">🌱</span>
+                        <span data-en="Life Stage" data-fi="Elämänvaihe">Life Stage</span>
+                    </h3>
+                    <p data-en="What describes your current life season?" data-fi="Mikä kuvaa nykyistä elämänvaihettasi?">What describes your current life season?</p>
+                    <div class="options-grid" id="life-stage-options">
+                        <div class="option-card" onclick="selectOption('lifeStage', 'student')" data-category="lifeStage" data-value="student">
+                            <h4 data-en="Student" data-fi="Opiskelija">Student</h4>
+                            <p data-en="Learning, growing, preparing for the future" data-fi="Oppimassa, kasvamassa, valmistautumassa tulevaisuuteen">Learning, growing, preparing for the future</p>
+                        </div>
+                        <div class="option-card" onclick="selectOption('lifeStage', 'young-adult')" data-category="lifeStage" data-value="young-adult">
+                            <h4 data-en="Young Adult" data-fi="Nuori Aikuinen">Young Adult</h4>
+                            <p data-en="Starting career, building independence" data-fi="Aloittamassa uraa, rakentamassa itsenäisyyttä">Starting career, building independence</p>
+                        </div>
+                        <div class="option-card" onclick="selectOption('lifeStage', 'parent')" data-category="lifeStage" data-value="parent">
+                            <h4 data-en="Parent" data-fi="Vanhempi">Parent</h4>
+                            <p data-en="Raising children, managing family life" data-fi="Kasvattamassa lapsia, hallitsemassa perhe-elämää">Raising children, managing family life</p>
+                        </div>
+                        <div class="option-card" onclick="selectOption('lifeStage', 'career')" data-category="lifeStage" data-value="career">
+                            <h4 data-en="Career Focus" data-fi="Urakeskeinen">Career Focus</h4>
+                            <p data-en="Building profession, achieving goals" data-fi="Rakentamassa ammattia, saavuttamassa tavoitteita">Building profession, achieving goals</p>
+                        </div>
+                        <div class="option-card" onclick="selectOption('lifeStage', 'midlife')" data-category="lifeStage" data-value="midlife">
+                            <h4 data-en="Midlife" data-fi="Keski-ikä">Midlife</h4>
+                            <p data-en="Reflecting, reassessing priorities" data-fi="Pohtimassa, arvioimassa prioriteetteja uudelleen">Reflecting, reassessing priorities</p>
+                        </div>
+                        <div class="option-card" onclick="selectOption('lifeStage', 'retirement')" data-category="lifeStage" data-value="retirement">
+                            <h4 data-en="Retirement" data-fi="Eläke">Retirement</h4>
+                            <p data-en="New chapter, legacy building" data-fi="Uusi luku, perinnön rakentaminen">New chapter, legacy building</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Challenges Section -->
+                <div class="category-section">
+                    <h3 class="category-title">
+                        <span class="category-icon">⛰️</span>
+                        <span data-en="Current Challenges" data-fi="Nykyiset Haasteet">Current Challenges</span>
+                    </h3>
+                    <p data-en="What area needs God's wisdom most right now?" data-fi="Mikä alue tarvitsee Jumalan viisautta eniten juuri nyt?">What area needs God's wisdom most right now?</p>
+                    <div class="options-grid" id="challenge-options">
+                        <div class="option-card" onclick="selectOption('challenge', 'stress')" data-category="challenge" data-value="stress">
+                            <h4 data-en="Stress & Anxiety" data-fi="Stressi & Ahdistus">Stress & Anxiety</h4>
+                            <p data-en="Overwhelmed, worried, needing peace" data-fi="Ylivoimainen, huolissaan, tarvitsemassa rauhaa">Overwhelmed, worried, needing peace</p>
+                        </div>
+                        <div class="option-card" onclick="selectOption('challenge', 'grief')" data-category="challenge" data-value="grief">
+                            <h4 data-en="Grief & Loss" data-fi="Suru & Menetys">Grief & Loss</h4>
+                            <p data-en="Processing loss, seeking comfort" data-fi="Käsittelemässä menetystä, etsimässä lohtua">Processing loss, seeking comfort</p>
+                        </div>
+                        <div class="option-card" onclick="selectOption('challenge', 'relationships')" data-category="challenge" data-value="relationships">
+                            <h4 data-en="Relationships" data-fi="Ihmissuhteet">Relationships</h4>
+                            <p data-en="Family, friends, romantic challenges" data-fi="Perhe, ystävät, romanttisia haasteita">Family, friends, romantic challenges</p>
+                        </div>
+                        <div class="option-card" onclick="selectOption('challenge', 'transitions')" data-category="challenge" data-value="transitions">
+                            <h4 data-en="Life Transitions" data-fi="Elämän Muutokset">Life Transitions</h4>
+                            <p data-en="Moving, job changes, new seasons" data-fi="Muuttamassa, työmuutoksia, uusia aikakauseja">Moving, job changes, new seasons</p>
+                        </div>
+                        <div class="option-card" onclick="selectOption('challenge', 'purpose')" data-category="challenge" data-value="purpose">
+                            <h4 data-en="Finding Purpose" data-fi="Tarkoituksen Etsiminen">Finding Purpose</h4>
+                            <p data-en="Direction, calling, meaning" data-fi="Suunta, kutsumus, merkitys">Direction, calling, meaning</p>
+                        </div>
+                        <div class="option-card" onclick="selectOption('challenge', 'financial')" data-category="challenge" data-value="financial">
+                            <h4 data-en="Financial Concerns" data-fi="Taloudelliset Huolet">Financial Concerns</h4>
+                            <p data-en="Money worries, provision, stewardship" data-fi="Raha-huolet, huolenpito, taloudenhoito">Money worries, provision, stewardship</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spiritual Season Section -->
+                <div class="category-section">
+                    <h3 class="category-title">
+                        <span class="category-icon">✝️</span>
+                        <span data-en="Spiritual Season" data-fi="Hengellinen Aikakausi">Spiritual Season</span>
+                    </h3>
+                    <p data-en="Where are you in your faith journey?" data-fi="Missä olet uskomatkallasi?">Where are you in your faith journey?</p>
+                    <div class="options-grid" id="spiritual-options">
+                        <div class="option-card" onclick="selectOption('spiritual', 'new-believer')" data-category="spiritual" data-value="new-believer">
+                            <h4 data-en="New Believer" data-fi="Uusi Uskova">New Believer</h4>
+                            <p data-en="Fresh faith, learning basics" data-fi="Tuore usko, opettelemassa perusasioita">Fresh faith, learning basics</p>
+                        </div>
+                        <div class="option-card" onclick="selectOption('spiritual', 'growing')" data-category="spiritual" data-value="growing">
+                            <h4 data-en="Growing" data-fi="Kasvava">Growing</h4>
+                            <p data-en="Deepening understanding, maturing" data-fi="Syventämässä ymmärrystä, kypsymässä">Deepening understanding, maturing</p>
+                        </div>
+                        <div class="option-card" onclick="selectOption('spiritual', 'struggling')" data-category="spiritual" data-value="struggling">
+                            <h4 data-en="Struggling" data-fi="Kamppaileva">Struggling</h4>
+                            <p data-en="Doubts, questions, dry season" data-fi="Epäilyksiä, kysymyksiä, kuiva kausi">Doubts, questions, dry season</p>
+                        </div>
+                        <div class="option-card" onclick="selectOption('spiritual', 'seeking')" data-category="spiritual" data-value="seeking">
+                            <h4 data-en="Seeking" data-fi="Etsivä">Seeking</h4>
+                            <p data-en="Exploring faith, asking questions" data-fi="Tutkimassa uskoa, esittämässä kysymyksiä">Exploring faith, asking questions</p>
+                        </div>
+                        <div class="option-card" onclick="selectOption('spiritual', 'mature')" data-category="spiritual" data-value="mature">
+                            <h4 data-en="Mature" data-fi="Kypsä">Mature</h4>
+                            <p data-en="Established faith, serving others" data-fi="Vakiintunut usko, palvelemassa muita">Established faith, serving others</p>
+                        </div>
+                        <div class="option-card" onclick="selectOption('spiritual', 'returning')" data-category="spiritual" data-value="returning">
+                            <h4 data-en="Returning" data-fi="Palaava">Returning</h4>
+                            <p data-en="Coming back to faith" data-fi="Palaamassa uskoon">Coming back to faith</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="generate-btn" onclick="generateDevotional()" id="generate-btn" disabled data-en="Generate My Personal Devotional" data-fi="Luo Henkilökohtainen Hartauteni">Generate My Personal Devotional</button>
+            </div>
+        </div>
+
+        <!-- Loading Screen -->
+        <div id="loading" class="screen">
+            <div class="loading">
+                <div class="spinner"></div>
+                <h3 data-en="Creating Your Personal Devotional..." data-fi="Luodaan Henkilökohtaista Hartauttasi...">Creating Your Personal Devotional...</h3>
+                <p data-en="Crafting God's word specifically for your season" data-fi="Muotoillaan Jumalan sanaa erityisesti sinun aikakauttasi varten">Crafting God's word specifically for your season</p>
+            </div>
+        </div>
+
+        <!-- Devotional Screen -->
+        <div id="devotional" class="screen">
+            <div class="devotional slide-in-right">
+                <div class="devotional-header">
+                    <div class="devotional-date" id="devotional-date">Today's Date</div>
+                    <h2 class="devotional-title" id="devotional-title">Your Personal Word</h2>
+                    <p class="devotional-theme" id="devotional-theme">Theme for your season</p>
+                </div>
+
+                <div class="scripture-section">
+                    <div class="scripture-reference" id="scripture-ref">Reference</div>
+                    <div class="scripture-text" id="scripture-text">Scripture Text</div>
+                    <div class="audio-controls">
+                        <button class="audio-btn" onclick="playScripture()" data-en="🔊 Listen (English)" data-fi="🔊 Kuuntele (Suomi)">🔊 Listen</button>
+                        <button class="audio-btn" onclick="meditateOnVerse()" data-en="💭 Meditate" data-fi="💭 Meditoi">💭 Meditate</button>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title">
+                        <span>📖</span>
+                        <span data-en="Reflection" data-fi="Pohdinta">Reflection</span>
+                    </h3>
+                    <div class="section-content" id="reflection-content">
+                        Reflection content will appear here...
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title">
+                        <span>❓</span>
+                        <span data-en="Questions for Your Heart" data-fi="Kysymyksiä Sydämellesi">Questions for Your Heart</span>
+                    </h3>
+                    <div class="reflection-questions" id="reflection-questions">
+                        <ul>
+                            <li data-en="Questions will appear here based on your selections" data-fi="Kysymykset ilmestyvät tähän valintojesi perusteella">Questions will appear here based on your selections</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title">
+                        <span>📝</span>
+                        <span data-en="Journal Your Thoughts" data-fi="Kirjaa Ajatuksesi">Journal Your Thoughts</span>
+                    </h3>
+                    <div class="journal-section">
+                        <p data-en="What is God speaking to your heart today?" data-fi="Mitä Jumala puhuu sydämellesi tänään?">What is God speaking to your heart today?</p>
+                        <textarea class="journal-textarea" id="journal-entry" data-en="Write your thoughts, prayers, and reflections here..." data-fi="Kirjaa ajatuksesi, rukouksesi ja pohdintasi tähän..." placeholder="Write your thoughts, prayers, and reflections here..."></textarea>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title">
+                        <span>🎯</span>
+                        <span data-en="Action Steps" data-fi="Toimintasuunnitelma">Action Steps</span>
+                    </h3>
+                    <div class="action-steps" id="action-steps">
+                        <ol>
+                            <li data-en="Action steps will be personalized for your situation" data-fi="Toimintasuunnitelma räätälöidään tilanteesi mukaan">Action steps will be personalized for your situation</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h3 class="section-title">
+                        <span>🙏</span>
+                        <span data-en="Prayer" data-fi="Rukous">Prayer</span>
+                    </h3>
+                    <div class="prayer-section">
+                        <p data-en="Let's pray together:" data-fi="Rukoillaan yhdessä:">Let's pray together:</p>
+                        <div class="prayer-text" id="prayer-text">
+                            Prayer will be generated based on your needs...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="devotional-actions">
+                    <button class="action-btn" onclick="saveDevotional()" data-en="💾 Save to Library" data-fi="💾 Tallenna Kirjastoon">💾 Save to Library</button>
+                    <button class="action-btn secondary" onclick="shareDevotional()" data-en="📤 Share" data-fi="📤 Jaa">📤 Share</button>
+                    <button class="action-btn" onclick="showScreen('assessment')" data-en="🔄 New Devotional" data-fi="🔄 Uusi Hartaus">🔄 New Devotional</button>
+                    <button class="action-btn secondary" onclick="showLibrary()" data-en="📚 My Library" data-fi="📚 Kirjastoni">📚 My Library</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Library Screen -->
+        <div id="library" class="screen">
+            <div class="library">
+                <div class="library-header">
+                    <h2 data-en="My Devotional Library" data-fi="Hartauskirjastoni">My Devotional Library</h2>
+                    <p data-en="Your saved devotionals and spiritual journey" data-fi="Tallennetut hartautesi ja hengellinen matkasi">Your saved devotionals and spiritual journey</p>
+                </div>
+
+                <div id="library-content">
+                    <div style="text-align: center; color: #6b7280; padding: 60px;">
+                        <h3 data-en="No saved devotionals yet" data-fi="Ei tallennettuja hartauksia vielä">No saved devotionals yet</h3>
+                        <p data-en="Generate and save your first personalized devotional to start building your library" data-fi="Luo ja tallenna ensimmäinen henkilökohtainen hartautesi aloittaaksesi kirjastosi rakentamisen">Generate and save your first personalized devotional to start building your library</p>
+                        <button class="action-btn" onclick="showScreen('assessment')" style="margin-top: 20px;" data-en="Create First Devotional" data-fi="Luo Ensimmäinen Hartaus">Create First Devotional</button>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="action-btn secondary" onclick="returnToDevotional()" data-en="← Back to Current Devotional" data-fi="← Takaisin Nykyiseen Hartauteen">← Back to Current Devotional</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Section -->
+        <div id="about" class="about-content" style="display: none;">
+            <h3 data-en="About Daily Devotional Generator" data-fi="Tietoa Päivittäisestä Hartausgeneraattorista">About Daily Devotional Generator</h3>
+            <p><strong data-en="Made by Justin" data-fi="Tehnyt Justin">Made by Justin</strong><br>
+            <strong data-en="Brand:" data-fi="Brändi:">Brand:</strong> Depths to Heights</p>
+            
+            <p data-en="This personalized devotional tool was created to meet you exactly where you are in life, offering God's Word specifically crafted for your current season, challenges, and spiritual journey." data-fi="Tämä henkilökohtainen hartaustyökalu luotiin kohtaamaan sinut juuri siellä missä olet elämässä, tarjoten Jumalan Sanaa erityisesti muotoiltuna nykyiseen aikakauttasi, haasteisiisi ja hengelliseen matkaasi.">This personalized devotional tool was created to meet you exactly where you are in life, offering God's Word specifically crafted for your current season, challenges, and spiritual journey.</p>
+            
+            <a href="https://depthstoheights.org" target="_blank" class="website-link" data-en="Visit Our Website" data-fi="Käy Verkkosivuillamme">
+                Visit Our Website
+            </a>
+            
+            <div class="crisis-note">
+                <strong data-en="Crisis Support: If you are in crisis, call or text 988 for immediate help." data-fi="Kriisituki: Jos olet kriisissä, soita tai lähetä tekstiviesti numeroon 988 saadaksesi välitöntä apua.">Crisis Support: If you are in crisis, call or text 988 for immediate help.</strong>
+            </div>
+            
+            <div class="donation-section">
+                <h4 style="margin-bottom: 15px;" data-en="Support Personal Devotional Ministry" data-fi="Tue Henkilökohtaista Hartauspalvelua">Support Personal Devotional Ministry</h4>
+                <p><strong data-en="If this app encouraged you, consider supporting the work of Depths to Heights." data-fi="Jos tämä sovellus rohkaisi sinua, harkitse Depths to Heights -työn tukemista.">If this app encouraged you, consider supporting the work of Depths to Heights.</strong></p>
+                <p data-en="Your donation helps us create more free, life-giving tools that bring God's Word personally to people in every season of life." data-fi="Lahjoituksesi auttaa meitä luomaan lisää ilmaisia, elämää antavia työkaluja, jotka tuovat Jumalan Sanan henkilökohtaisesti ihmisille jokaisessa elämänvaiheessa.">Your donation helps us create more free, life-giving tools that bring God's Word personally to people in every season of life.</p>
+                <a href="https://www.paypal.com/donate/?hosted_button_id=8GRE7B8C3TP2U" target="_blank" class="donation-link" data-en="Support Our Ministry" data-fi="Tue Palveluamme">
+                    Support Our Ministry
+                </a>
+            </div>
+            
+            <p><strong data-en="Contact:" data-fi="Yhteystiedot:">Contact:</strong> depthstoheights@gmail.com</p>
+            
+            <div style="margin-top: 30px;">
+                <button class="action-btn" onclick="hideAbout()" data-en="← Back to Devotionals" data-fi="← Takaisin Hartauksiin">← Back to Devotionals</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Player -->
+    <div class="audio-player">
+        <button class="volume-btn" onclick="toggleAudio()" id="audio-btn">🎵</button>
+        <button class="volume-btn" onclick="showAbout()" id="info-btn">ℹ️</button>
+    </div>
+
+    <!-- Background Audio -->
+    <audio id="background-audio" loop>
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+D2u2kgBSuAyu/jgSIFGGu+8+CVSA" type="audio/wav">
+    </audio>
+
+    <script>
+        // App State
+        let userAssessment = {
+            lifeStage: null,
+            challenge: null,
+            spiritual: null
+        };
+
+        let savedDevotionals = JSON.parse(localStorage.getItem('savedDevotionals')) || [];
+        let currentLanguage = 'en';
+        let audioEnabled = true;
+        let currentDevotional = null;
+
+        // Devotional Content Database
+        const devotionalContent = {
+            en: {
+                scriptures: {
+                    'student-stress-new-believer': {
+                        ref: "Philippians 4:6-7",
+                        text: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. And the peace of God, which transcends all understanding, will guard your hearts and your minds in Christ Jesus.",
+                        title: "God's Peace in Academic Pressure",
+                        theme: "Finding calm in the storm of student life"
+                    },
+                    'parent-relationships-growing': {
+                        ref: "Ephesians 6:4",
+                        text: "Fathers, do not exasperate your children; instead, bring them up in the training and instruction of the Lord.",
+                        title: "Parenting with God's Wisdom",
+                        theme: "Raising children with grace and truth"
+                    },
+                    'career-purpose-mature': {
+                        ref: "Jeremiah 29:11",
+                        text: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, to give you hope and a future.",
+                        title: "Purpose in Professional Life",
+                        theme: "Aligning career with God's calling"
+                    },
+                    'retirement-transitions-mature': {
+                        ref: "Isaiah 46:4",
+                        text: "Even to your old age and gray hairs I am he, I am he who will sustain you. I have made you and I will carry you; I will sustain you and I will rescue you.",
+                        title: "Faithful in Every Season",
+                        theme: "God's presence in life transitions"
+                    },
+                    'default': {
+                        ref: "Psalm 119:105",
+                        text: "Your word is a lamp for my feet, a light on my path.",
+                        title: "God's Guidance for Today",
+                        theme: "Walking in His light"
+                    }
+                }
+            },
+            fi: {
+                scriptures: {
+                    'student-stress-new-believer': {
+                        ref: "Filippiläiskirje 4:6-7",
+                        text: "Älkää murehtiko mistään, vaan saattakaa kaikissa tilaisuuksissa anomisenne, rukouksenne ja kiitoksenne kautta Jumalan tietoon. Ja Jumalan rauha, joka ylittää kaiken ymmärryksen, varjelee teidän sydämenne ja ajatuksenne Kristuksessa Jeesuksessa.",
+                        title: "Jumalan Rauha Opintopaineessa",
+                        theme: "Rauhan löytäminen opiskeluelämän myrskyssä"
+                    },
+                    'parent-relationships-growing': {
+                        ref: "Efesolaiskirje 6:4",
+                        text: "Te isät, älkää ärsyttäkö lapsianne, vaan kasvattakaa heitä Herran kurissa ja opetuksessa.",
+                        title: "Vanhemmuus Jumalan Viisaudella",
+                        theme: "Lasten kasvattaminen armossa ja totuudessa"
+                    },
+                    'career-purpose-mature': {
+                        ref: "Jeremia 29:11",
+                        text: "Minä tiedän suunnitelmani teitä kohtaan, sanoo Herra, rauhan eikä onnettomuuden aikomukset, että antaisin teille tulevaisuuden ja toivon.",
+                        title: "Tarkoitus Ammatillisessa Elämässä",
+                        theme: "Uran sovittaminen Jumalan kutsuun"
+                    },
+                    'retirement-transitions-mature': {
+                        ref: "Jesaja 46:4",
+                        text: "Teidän vanhuuteenne asti minä olen sama, ja harmaaksi tultuanne minä kannan teitä. Minä olen tehnyt, ja minä kannan, minä nostan ja pelastan.",
+                        title: "Uskollinen Jokaisessa Aikakaudessa",
+                        theme: "Jumalan läsnäolo elämän muutoksissa"
+                    },
+                    'default': {
+                        ref: "Psalmit 119:105",
+                        text: "Sinun sanasi on minun jalkani lamppu ja valkeus minun poluilleni.",
+                        title: "Jumalan Opastus Tälle Päivälle",
+                        theme: "Vaeltaminen Hänen valossaan"
+                    }
+                }
+            }
+        };
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                const audio = document.getElementById('background-audio');
+                audio.volume = 0.05;
+                if (audioEnabled) {
+                    audio.play().catch(e => console.log('Audio autoplay prevented'));
+                }
+            }, 2000);
+            
+            updateLanguageDisplay();
+        });
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            setTimeout(() => {
+                document.getElementById(screenId).classList.add('active');
+                if (screenId !== 'opening') {
+                    document.querySelector('.home-btn').style.display = 'block';
+                }
+            }, 300);
+        }
+
+        function goHome() {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            setTimeout(() => {
+                document.getElementById('opening').classList.add('active');
+                document.querySelector('.home-btn').style.display = 'none';
+            }, 300);
+        }
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'fi' : 'en';
+            document.getElementById('lang-toggle').textContent = currentLanguage === 'en' ? 'Suomi' : 'English';
+            updateLanguageDisplay();
+        }
+
+        function updateLanguageDisplay() {
+            const elements = document.querySelectorAll(`[data-${currentLanguage}]`);
+            elements.forEach(element => {
+                const text = element.getAttribute(`data-${currentLanguage}`);
+                if (text) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                        element.placeholder = text;
+                    } else {
+                        element.innerHTML = text;
+                    }
+                }
+            });
+        }
+
+        function selectOption(category, value) {
+            // Clear previous selections in this category
+            document.querySelectorAll(`[data-category="${category}"]`).forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Select new option
+            event.target.closest('.option-card').classList.add('selected');
+            userAssessment[category] = value;
+            
+            // Check if all categories are selected
+            checkAssessmentComplete();
+        }
+
+        function checkAssessmentComplete() {
+            const allSelected = userAssessment.lifeStage && 
+                              userAssessment.challenge && 
+                              userAssessment.spiritual;
+            
+            const generateBtn = document.getElementById('generate-btn');
+            generateBtn.disabled = !allSelected;
+            
+            if (allSelected) {
+                generateBtn.classList.add('pulse');
+            } else {
+                generateBtn.classList.remove('pulse');
+            }
+        }
+
+        function generateDevotional() {
+            // Show loading screen
+            showScreen('loading');
+            
+            // Simulate generation time for better UX
+            setTimeout(() => {
+                createPersonalizedDevotional();
+                showScreen('devotional');
+            }, 3000);
+        }
+
+        function createPersonalizedDevotional() {
+            const key = `${userAssessment.lifeStage}-${userAssessment.challenge}-${userAssessment.spiritual}`;
+            const scripture = devotionalContent[currentLanguage].scriptures[key] || 
+                            devotionalContent[currentLanguage].scriptures.default;
+            
+            // Set devotional content
+            document.getElementById('devotional-date').textContent = new Date().toLocaleDateString(
+                currentLanguage === 'fi' ? 'fi-FI' : 'en-US',
+                { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+            );
+            
+            document.getElementById('devotional-title').textContent = scripture.title;
+            document.getElementById('devotional-theme').textContent = scripture.theme;
+            document.getElementById('scripture-ref').textContent = scripture.ref;
+            document.getElementById('scripture-text').textContent = scripture.text;
+            
+            // Generate personalized reflection
+            generateReflectionContent();
+            generateQuestions();
+            generateActionSteps();
+            generatePrayer();
+            
+            // Store current devotional
+            currentDevotional = {
+                id: Date.now(),
+                date: new Date().toISOString(),
+                assessment: {...userAssessment},
+                content: {
+                    title: scripture.title,
+                    theme: scripture.theme,
+                    scripture: scripture,
+                    language: currentLanguage
+                }
+            };
+        }
+
+        function generateReflectionContent() {
+            const reflections = {
+                en: {
+                    'student-stress': "In the demanding world of academics, it's easy to feel overwhelmed by deadlines, expectations, and uncertainty about the future. But God sees your struggles and invites you into His peace. This isn't just wishful thinking—it's a promise backed by His character and love for you.",
+                    'parent-relationships': "Parenting is one of life's greatest privileges and challenges. Every day brings moments where you question your decisions, worry about your children's futures, or feel inadequate for the task. God understands these feelings and offers His wisdom for the journey.",
+                    'career-purpose': "In your professional life, you may find yourself asking deeper questions about meaning and purpose. Work can feel routine or even empty if it's disconnected from God's larger story for your life. He has plans that go beyond just career success.",
+                    'retirement-transitions': "Life transitions can feel uncertain, even when they're positive changes. As you enter this new season, God's faithfulness remains constant. He who has carried you this far will continue to sustain you in the days ahead.",
+                    'default': "God's Word is not just ancient text—it's living guidance for your current circumstances. Whatever you're facing today, His truth provides both comfort and direction for the path ahead."
+                },
+                fi: {
+                    'student-stress': "Vaativassa akateemisessa maailmassa on helppo tuntea itsensä ylivoimaisten määräaikojen, odotusten ja tulevaisuuden epävarmuuden painamaksi. Mutta Jumala näkee kamppailusi ja kutsuu sinut Hänen rauhaansa. Tämä ei ole vain toiveajattelua—se on lupaus, joka perustuu Hänen luonteeseensa ja rakkauteensa sinua kohtaan.",
+                    'parent-relationships': "Vanhemmuus on yksi elämän suurimmista etuoikeuksista ja haasteista. Jokainen päivä tuo hetkiä, jolloin kyseenalaistat päätöksesi, huolehdit lastesi tulevaisuudesta tai tunnet itsesi riittämättömäksi tehtävään. Jumala ymmärtää nämä tunteet ja tarjoaa viisautensa matkalle.",
+                    'career-purpose': "Ammatillisessa elämässäsi saatat huomata kysyväsi syvempiä kysymyksiä merkityksestä ja tarkoituksesta. Työ voi tuntua rutiinilta tai jopa tyhjältä, jos se on irrallaan Jumalan suuremmasta tarinasta elämällesi. Hänellä on suunnitelmia, jotka menevät pelkkää uramenestystä pidemmälle.",
+                    'retirement-transitions': "Elämän muutokset voivat tuntua epävarmoilta, vaikka ne olisivat positiivisia muutoksia. Kun astut tähän uuteen aikakauteen, Jumalan uskollisuus pysyy muuttumattomana. Hän, joka on kantanut sinut tähän asti, jatkaa sinun tukemistasi tulevina päivinä.",
+                    'default': "Jumalan Sana ei ole vain muinaista tekstiä—se on elävää opastusta nykyisiin olosuhteisiisi. Mitä tahansa kohtaatkin tänään, Hänen totuutensa tarjoaa sekä lohtua että suuntaa eteenpäin kulkevalle polulle."
+                }
+            };
+            
+            const key = `${userAssessment.lifeStage}-${userAssessment.challenge}`;
+            const reflection = reflections[currentLanguage][key] || reflections[currentLanguage].default;
+            document.getElementById('reflection-content').textContent = reflection;
+        }
+
+        function generateQuestions() {
+            const questions = {
+                en: {
+                    'student-stress': [
+                        "What specific worries are you carrying that you can surrender to God today?",
+                        "How might viewing your studies as worship to God change your perspective?",
+                        "Where do you need to experience God's peace most right now?"
+                    ],
+                    'parent-relationships': [
+                        "What aspects of parenting feel most overwhelming right now?",
+                        "How can you model God's love and patience in your family today?",
+                        "What wisdom do you need from God for your children's current season?"
+                    ],
+                    'career-purpose': [
+                        "How do you see God working through your professional skills and abilities?",
+                        "What would it look like to honor God in your workplace today?",
+                        "Where do you sense God leading you in your career journey?"
+                    ],
+                    'retirement-transitions': [
+                        "What legacy do you want to leave for future generations?",
+                        "How is God calling you to use this new season for His purposes?",
+                        "What fears about aging or change do you need to surrender to God?"
+                    ],
+                    'default': [
+                        "Where do you most need God's guidance today?",
+                        "How is God speaking to you through His Word?",
+                        "What step of faith is He calling you to take?"
+                    ]
+                },
+                fi: {
+                    'student-stress': [
+                        "Mitä tiettyjä huolia kannat, jotka voit antaa Jumalalle tänään?",
+                        "Miten opintojesi näkeminen palvontana Jumalalle voisi muuttaa näkökulmaasi?",
+                        "Missä tarvitset Jumalan rauhaa eniten juuri nyt?"
+                    ],
+                    'parent-relationships': [
+                        "Mitkä vanhemmuuden osa-alueet tuntuvat tällä hetkellä ylivoimaisilta?",
+                        "Miten voit mallintaa Jumalan rakkautta ja kärsivällisyyttä perheessäsi tänään?",
+                        "Mitä viisautta tarvitset Jumalalta lastesi nykyiseen aikakauteen?"
+                    ],
+                    'career-purpose': [
+                        "Miten näet Jumalan työskentelevän ammatillisten taitojesi ja kykyjesi kautta?",
+                        "Miltä näyttäisi Jumalan kunnioittaminen työpaikallasi tänään?",
+                        "Mihin tunnet Jumalan johtavan sinua urasi matkalla?"
+                    ],
+                    'retirement-transitions': [
+                        "Millaisen perinnön haluat jättää tuleville sukupolville?",
+                        "Miten Jumala kutsuu sinua käyttämään tätä uutta aikakautta Hänen tarkoituksiinsa?",
+                        "Mitä pelkoja ikääntymisestä tai muutoksesta sinun tulee antaa Jumalalle?"
+                    ],
+                    'default': [
+                        "Missä tarvitset Jumalan opastusta eniten tänään?",
+                        "Miten Jumala puhuu sinulle Sanansa kautta?",
+                        "Mitä uskon askelta Hän kutsuu sinua ottamaan?"
+                    ]
+                }
+            };
+            
+            const key = `${userAssessment.lifeStage}-${userAssessment.challenge}`;
+            const questionList = questions[currentLanguage][key] || questions[currentLanguage].default;
+            
+            const questionsHtml = questionList.map(q => `<li>${q}</li>`).join('');
+            document.getElementById('reflection-questions').innerHTML = `<ul>${questionsHtml}</ul>`;
+        }
+
+        function generateActionSteps() {
+            const actions = {
+                en: {
+                    'student-stress': [
+                        "Start your study sessions with a brief prayer, asking for God's wisdom and peace",
+                        "Take regular breaks to breathe deeply and remember God's presence with you",
+                        "Write down three things you're grateful for each day, even in stressful times"
+                    ],
+                    'parent-relationships': [
+                        "Pray for each of your children by name today, asking for God's blessing on their lives",
+                        "Look for one moment to offer grace instead of correction",
+                        "Read a Bible story with your family this week"
+                    ],
+                    'career-purpose': [
+                        "Ask God to show you how your work serves others and glorifies Him",
+                        "Look for opportunities to be a light in your workplace today",
+                        "Spend time in prayer about your long-term career direction"
+                    ],
+                    'retirement-transitions': [
+                        "Thank God for His faithfulness throughout your life journey",
+                        "Consider how you might mentor or encourage someone younger",
+                        "Explore new ways to serve in your church or community"
+                    ],
+                    'default': [
+                        "Spend 10 minutes in prayer and Bible reading today",
+                        "Look for one opportunity to show God's love to someone",
+                        "Practice gratitude by listing three blessings from today"
+                    ]
+                },
+                fi: {
+                    'student-stress': [
+                        "Aloita opiskelutuokiosi lyhyellä rukouksella, pyytäen Jumalan viisautta ja rauhaa",
+                        "Pidä säännöllisiä taukoja hengittääksesi syvään ja muistaaksesi Jumalan läsnäolon kanssasi",
+                        "Kirjaa ylös kolme asiaa, joista olet kiitollinen joka päivä, jopa stressaavina aikoina"
+                    ],
+                    'parent-relationships': [
+                        "Rukoile jokaisen lapsesi puolesta nimeltä tänään, pyytäen Jumalan siunausta heidän elämäänsä",
+                        "Etsi yksi hetki tarjota armoa korjauksen sijaan",
+                        "Lue Raamatun tarina perheesi kanssa tällä viikolla"
+                    ],
+                    'career-purpose': [
+                        "Pyydä Jumalaa näyttämään sinulle, miten työsi palvelee muita ja kirkastaa Häntä",
+                        "Etsi mahdollisuuksia olla valo työpaikallasi tänään",
+                        "Käytä aikaa rukouksessa pitkäaikaisesta urasuunnastasi"
+                    ],
+                    'retirement-transitions': [
+                        "Kiitä Jumalaa Hänen uskollisuudestaan koko elämänmatkasi ajan",
+                        "Harkitse, miten voisit mentoroida tai rohkaista nuorempaa henkilöä",
+                        "Tutki uusia tapoja palvella seurakunnassasi tai yhteisössäsi"
+                    ],
+                    'default': [
+                        "Käytä 10 minuuttia rukoukseen ja Raamatun lukemiseen tänään",
+                        "Etsi yksi mahdollisuus osoittaa Jumalan rakkautta jollekulle",
+                        "Harjoittele kiitollisuutta listaamalla kolme siunausta tältä päivältä"
+                    ]
+                }
+            };
+            
+            const key = `${userAssessment.lifeStage}-${userAssessment.challenge}`;
+            const actionList = actions[currentLanguage][key] || actions[currentLanguage].default;
+            
+            const actionsHtml = actionList.map((action, index) => `<li>${action}</li>`).join('');
+            document.getElementById('action-steps').innerHTML = `<ol>${actionsHtml}</ol>`;
+        }
+
+        function generatePrayer() {
+            const prayers = {
+                en: {
+                    'student-stress': "Heavenly Father, thank You for the opportunity to learn and grow. I bring my academic worries and pressures to You, knowing that You care about every detail of my life. Grant me Your peace that surpasses understanding, wisdom for my studies, and trust in Your perfect timing. Help me to see my education as a gift from You and to use it for Your glory. In Jesus' name, Amen.",
+                    'parent-relationships': "Lord, thank You for the precious gift of my children. Parenting feels overwhelming at times, and I need Your wisdom and patience daily. Help me to love like You love—with grace, truth, and endless compassion. Guide my words and actions so they reflect Your heart. Give me strength for the challenges and joy in the blessings of this calling. In Jesus' name, Amen.",
+                    'career-purpose': "God, thank You for the abilities and opportunities You've given me. I want my work to matter for Your kingdom and to be a blessing to others. Show me how to honor You in my professional life and guide my career decisions according to Your will. Help me to find fulfillment in serving You through my work. In Jesus' name, Amen.",
+                    'retirement-transitions': "Faithful God, You have been with me through every season of my life, and I trust You with this new chapter. Thank You for Your constant presence and love. Show me how to use this time for Your purposes and to be a blessing to others. Help me to embrace this transition with faith and hope. In Jesus' name, Amen.",
+                    'default': "Loving Father, thank You for Your Word that guides and comforts me. I come to You with all my concerns and hopes, trusting in Your perfect love and wisdom. Help me to walk in Your ways and to trust You with my future. May Your will be done in my life. In Jesus' name, Amen."
+                },
+                fi: {
+                    'student-stress': "Taivaallinen Isä, kiitos mahdollisuudesta oppia ja kasvaa. Tuon akateemiset huoleni ja paineeni Sinulle, tietäen että välität elämäni jokaisesta yksityiskohdasta. Anna minulle rauhasi, joka ylittää ymmärryksen, viisautta opintoihini ja luottamusta täydelliseen ajoitukseesi. Auta minua näkemään koulutukseni lahjana Sinulta ja käyttämään sitä Sinun kunniaksesi. Jeesuksen nimessä, Aamen.",
+                    'parent-relationships': "Herra, kiitos arvokkaasta lahjasta, lapsistani. Vanhemmuus tuntuu välillä ylivoimaiselta, ja tarvitsen viisauttasi ja kärsivällisyyttäsi päivittäin. Auta minua rakastamaan kuten Sinä rakastat—armolla, totuudella ja loputtomalla myötätunnolla. Ohjaa sanojani ja tekojani, jotta ne heijastavat Sinun sydäntäsi. Anna minulle voimaa haasteisiin ja iloa tämän kutsumuksen siunauksiin. Jeesuksen nimessä, Aamen.",
+                    'career-purpose': "Jumala, kiitos kyvyistä ja mahdollisuuksista, joita olet minulle antanut. Haluan työni olevan merkityksellinen Sinun valtakunnallesi ja siunausta muille. Näytä minulle, miten kunnioittaa Sinua ammatillisessa elämässäni ja ohjaa uravalintojani tahtosi mukaan. Auta minua löytämään täyttymys palvelemalla Sinua työni kautta. Jeesuksen nimessä, Aamen.",
+                    'retirement-transitions': "Uskollinen Jumala, olet ollut kanssani elämäni jokaisessa aikakaudessa, ja luotan Sinuun tässä uudessa luvussa. Kiitos jatkuvasta läsnäolostasi ja rakkaudestasi. Näytä minulle, miten käyttää tämä aika tarkoituksiisi ja olla siunauksena muille. Auta minua omaksumaan tämä muutos uskossa ja toivossa. Jeesuksen nimessä, Aamen.",
+                    'default': "Rakastava Isä, kiitos Sanastasi, joka ohjaa ja lohduttaa minua. Tulen Sinun luoksesi kaikki huoleni ja toiveeni, luottaen täydelliseen rakkauttesi ja viisauteesi. Auta minua vaeltamaan Sinun teillä ja luottamaan Sinuun tulevaisuuteni kanssa. Tapahtukoon tahtosi elämässäni. Jeesuksen nimessä, Aamen."
+                }
+            };
+            
+            const key = `${userAssessment.lifeStage}-${userAssessment.challenge}`;
+            const prayer = prayers[currentLanguage][key] || prayers[currentLanguage].default;
+            document.getElementById('prayer-text').textContent = prayer;
+        }
+
+        function playScripture() {
+            // In a real implementation, this would play actual audio
+            const scripture = document.getElementById('scripture-text').textContent;
+            alert(`🔊 Audio: "${scripture}"`);
+        }
+
+        function meditateOnVerse() {
+            const meditations = {
+                en: "Take a moment to slowly read this verse again. What word or phrase stands out to you? How might God be speaking to your heart through these words?",
+                fi: "Käytä hetki lukemaan tämä jae hitaasti uudelleen. Mikä sana tai lause erottuu sinulle? Miten Jumala saattaa puhua sydämellesi näiden sanojen kautta?"
+            };
+            
+            alert(meditations[currentLanguage]);
+        }
+
+        function saveDevotional() {
+            if (currentDevotional) {
+                // Add journal entry to devotional
+                const journalEntry = document.getElementById('journal-entry').value;
+                currentDevotional.journalEntry = journalEntry;
+                
+                savedDevotionals.unshift(currentDevotional);
+                localStorage.setItem('savedDevotionals', JSON.stringify(savedDevotionals));
+                
+                const message = currentLanguage === 'en' 
+                    ? 'Devotional saved to your library!' 
+                    : 'Hartaus tallennettu kirjastoosi!';
+                alert(message);
+            }
+        }
+
+        function shareDevotional() {
+            if (currentDevotional) {
+                const shareText = currentLanguage === 'en'
+                    ? `Today's devotional: "${currentDevotional.content.title}" - ${currentDevotional.content.scripture.ref}\n\n"${currentDevotional.content.scripture.text}"\n\nGenerated by Daily Devotional Generator - Depths to Heights`
+                    : `Tämän päivän hartaus: "${currentDevotional.content.title}" - ${currentDevotional.content.scripture.ref}\n\n"${currentDevotional.content.scripture.text}"\n\nLuotu Päivittäinen Hartausgeneraattori - Depths to Heights`;
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: currentDevotional.content.title,
+                        text: shareText
+                    });
+                } else {
+                    navigator.clipboard.writeText(shareText).then(() => {
+                        const message = currentLanguage === 'en' 
+                            ? 'Devotional copied to clipboard!' 
+                            : 'Hartaus kopioitu leikepöydälle!';
+                        alert(message);
+                    });
+                }
+            }
+        }
+
+        function showLibrary() {
+            showScreen('library');
+            loadLibrary();
+        }
+
+        function loadLibrary() {
+            const container = document.getElementById('library-content');
+            
+            if (savedDevotionals.length === 0) {
+                const emptyMessage = currentLanguage === 'en'
+                    ? `<div style="text-align: center; color: #6b7280; padding: 60px;">
+                        <h3>No saved devotionals yet</h3>
+                        <p>Generate and save your first personalized devotional to start building your library</p>
+                        <button class="action-btn" onclick="showScreen('assessment')" style="margin-top: 20px;">Create First Devotional</button>
+                    </div>`
+                    : `<div style="text-align: center; color: #6b7280; padding: 60px;">
+                        <h3>Ei tallennettuja hartauksia vielä</h3>
+                        <p>Luo ja tallenna ensimmäinen henkilökohtainen hartautesi aloittaaksesi kirjastosi rakentamisen</p>
+                        <button class="action-btn" onclick="showScreen('assessment')" style="margin-top: 20px;">Luo Ensimmäinen Hartaus</button>
+                    </div>`;
+                container.innerHTML = emptyMessage;
+                return;
+            }
+            
+            const devotionalsHtml = savedDevotionals.map(devotional => `
+                <div class="devotional-card" onclick="loadSavedDevotional('${devotional.id}')">
+                    <div class="card-date">${new Date(devotional.date).toLocaleDateString()}</div>
+                    <div class="card-title">${devotional.content.title}</div>
+                    <div class="card-preview">${devotional.content.theme}</div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = devotionalsHtml;
+        }
+
+        function loadSavedDevotional(id) {
+            const devotional = savedDevotionals.find(d => d.id == id);
+            if (devotional) {
+                currentDevotional = devotional;
+                userAssessment = devotional.assessment;
+                currentLanguage = devotional.content.language;
+                
+                // Update language display
+                document.getElementById('lang-toggle').textContent = currentLanguage === 'en' ? 'Suomi' : 'English';
+                updateLanguageDisplay();
+                
+                // Load devotional content
+                setTimeout(() => {
+                    createPersonalizedDevotional();
+                    if (devotional.journalEntry) {
+                        document.getElementById('journal-entry').value = devotional.journalEntry;
+                    }
+                    showScreen('devotional');
+                }, 100);
+            }
+        }
+
+        function returnToDevotional() {
+            if (currentDevotional) {
+                showScreen('devotional');
+            } else {
+                showScreen('assessment');
+            }
+        }
+
+        function showAbout() {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById('about').style.display = 'block';
+        }
+
+        function hideAbout() {
+            document.getElementById('about').style.display = 'none';
+            if (currentDevotional) {
+                showScreen('devotional');
+            } else {
+                showScreen('hub');
+            }
+        }
+
+        function toggleAudio() {
+            const audio = document.getElementById('background-audio');
+            const btn = document.getElementById('audio-btn');
+            
+            audioEnabled = !audioEnabled;
+            
+            if (audioEnabled) {
+                audio.play().catch(e => console.log('Audio play failed'));
+                btn.textContent = '🎵';
+            } else {
+                audio.pause();
+                btn.textContent = '🔇';
+            }
+        }
+
+        // Smooth interactions
+        document.addEventListener('click', function(e) {
+            if (e.target.matches('button') || e.target.closest('button')) {
+                const btn = e.target.matches('button') ? e.target : e.target.closest('button');
+                if (!btn.disabled) {
+                    btn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        btn.style.transform = '';
+                    }, 150);
+                }
+            }
+        });
+
+        // Auto-save journal entries
+        document.addEventListener('DOMContentLoaded', function() {
+            const journalInput = document.getElementById('journal-entry');
+            if (journalInput) {
+                journalInput.addEventListener('input', function() {
+                    localStorage.setItem('currentJournalEntry', this.value);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
